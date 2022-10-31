@@ -33,3 +33,11 @@ begin
     update Train set available_ac_coaches = available_ac_coaches - ac_coaches, available_sl_coaches = available_sl_coaches - sl_coaches where train_id = trainId and date_of_journey = dateofjourney;
 end;
 $$ language plpgsql;
+
+
+-- create table
+create or replace function add_train(trainName VARCHAR(10)) returns void as $$
+begin
+    execute 'create table '|| trainName  ||'(train_id SERIAL )' ; 
+end;
+$$ language plpgsql;    
