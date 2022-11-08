@@ -1,50 +1,60 @@
-CREATE TABLE Coach_Details (
-  Berth_Number INT NOT NULL,
-  B_Type CHAR(2) NOT NULL
+CREATE TABLE ac_coach (
+  berth_number INT NOT NULL,
+  berth_type CHAR(2) NOT NULL
 );
 
-INSERT INTO Coach_Details VALUES(1,'LB')
-INSERT INTO Coach_Details VALUES(2,'LB')
-INSERT INTO Coach_Details VALUES(3,'UB')
-INSERT INTO Coach_Details VALUES(4,'UB')
-INSERT INTO Coach_Details VALUES(5,'SL')
-INSERT INTO Coach_Details VALUES(6,'SU')
-INSERT INTO Coach_Details VALUES(7,'LB')
-INSERT INTO Coach_Details VALUES(8,'LB')
-INSERT INTO Coach_Details VALUES(9,'UB')
-INSERT INTO Coach_Details VALUES(10,'UB')
-INSERT INTO Coach_Details VALUES(11,'SL')
-INSERT INTO Coach_Details VALUES(12,'SU')
-INSERT INTO Coach_Details VALUES(13,'LB')
-INSERT INTO Coach_Details VALUES(14,'LB')
-INSERT INTO Coach_Details VALUES(15,'UB')
-INSERT INTO Coach_Details VALUES(16,'UB')
-INSERT INTO Coach_Details VALUES(17,'SL')
-INSERT INTO Coach_Details VALUES(18,'SU')
-INSERT INTO Coach_Details VALUES(19,'LB')
-INSERT INTO Coach_Details VALUES(20,'MB')
-INSERT INTO Coach_Details VALUES(21,'UB')
-INSERT INTO Coach_Details VALUES(22,'LB')
-INSERT INTO Coach_Details VALUES(23,'MB')
-INSERT INTO Coach_Details VALUES(24,'UB')
-INSERT INTO Coach_Details VALUES(25,'SL')
-INSERT INTO Coach_Details VALUES(26,'SU')
-INSERT INTO Coach_Details VALUES(27,'LB')
-INSERT INTO Coach_Details VALUES(28,'MB')
-INSERT INTO Coach_Details VALUES(29,'UB')
-INSERT INTO Coach_Details VALUES(30,'LB')
-INSERT INTO Coach_Details VALUES(31,'MB')
-INSERT INTO Coach_Details VALUES(32,'UB')
-INSERT INTO Coach_Details VALUES(33,'SL')
-INSERT INTO Coach_Details VALUES(34,'SU')
-INSERT INTO Coach_Details VALUES(35,'LB')
-INSERT INTO Coach_Details VALUES(36,'MB')
-INSERT INTO Coach_Details VALUES(37,'UB')
-INSERT INTO Coach_Details VALUES(38,'LB')
-INSERT INTO Coach_Details VALUES(39,'MB')
-INSERT INTO Coach_Details VALUES(40,'UB')
-INSERT INTO Coach_Details VALUES(41,'SL')
-INSERT INTO Coach_Details VALUES(42,'SU')
+CREATE TABLE sl_coach (
+  berth_number INT NOT NULL,
+  berth_type CHAR(2) NOT NULL
+);
+
+
+
+INSERT INTO ac_coach VALUES(1,'LB');
+INSERT INTO ac_coach VALUES(2,'LB');
+INSERT INTO ac_coach VALUES(3,'UB');
+INSERT INTO ac_coach VALUES(4,'UB');
+INSERT INTO ac_coach VALUES(5,'SL');
+INSERT INTO ac_coach VALUES(6,'SU');
+INSERT INTO ac_coach VALUES(7,'LB');
+INSERT INTO ac_coach VALUES(8,'LB');
+INSERT INTO ac_coach VALUES(9,'UB');
+INSERT INTO ac_coach VALUES(10,'UB');
+INSERT INTO ac_coach VALUES(11,'SL');
+INSERT INTO ac_coach VALUES(12,'SU');
+INSERT INTO ac_coach VALUES(13,'LB');
+INSERT INTO ac_coach VALUES(14,'LB');
+INSERT INTO ac_coach VALUES(15,'UB');
+INSERT INTO ac_coach VALUES(16,'UB');
+INSERT INTO ac_coach VALUES(17,'SL');
+INSERT INTO ac_coach VALUES(18,'SU');
+
+
+
+INSERT INTO sl_coach VALUES(1,'LB');
+INSERT INTO sl_coach VALUES(2,'MB');
+INSERT INTO sl_coach VALUES(3,'UB');
+INSERT INTO sl_coach VALUES(4,'LB');
+INSERT INTO sl_coach VALUES(5,'MB');
+INSERT INTO sl_coach VALUES(6,'UB');
+INSERT INTO sl_coach VALUES(7,'SL');
+INSERT INTO sl_coach VALUES(8,'SU');
+INSERT INTO sl_coach VALUES(9,'LB');
+INSERT INTO sl_coach VALUES(10,'MB');
+INSERT INTO sl_coach VALUES(11,'UB');
+INSERT INTO sl_coach VALUES(12,'LB');
+INSERT INTO sl_coach VALUES(13,'MB');
+INSERT INTO sl_coach VALUES(14,'UB');
+INSERT INTO sl_coach VALUES(15,'SL');
+INSERT INTO sl_coach VALUES(16,'SU');
+INSERT INTO sl_coach VALUES(17,'LB');
+INSERT INTO sl_coach VALUES(18,'MB');
+INSERT INTO sl_coach VALUES(19,'UB');
+INSERT INTO sl_coach VALUES(20,'LB');
+INSERT INTO sl_coach VALUES(21,'MB');
+INSERT INTO sl_coach VALUES(22,'UB');
+INSERT INTO sl_coach VALUES(23,'SL');
+INSERT INTO sl_coach VALUES(24,'SU');
 
 
 

@@ -1,68 +1,35 @@
--- trigger before insert in Train language postgresql
-
-CREATE OR REPLACE FUNCTION CHECK_TRAIN() RETURNS TRIGGER 
-AS 
-	$$ begin if (new.total_ac_coaches < 0) then raise exception 'total ac coaches cannot be negative';
-	end if;
-	if (new.total_non_sl_coaches < 0) then raise exception 'total non sl coaches cannot be negative';
-	end if;
-	if (new.available_ac_coaches < 0) then raise exception 'available ac coaches cannot be negative';
-	end if;
-	if (new.available_sl_coaches < 0) then raise exception 'available sl coaches cannot be negative';
-	end if;
-	if (
-	    new.available_ac_coaches > new.total_ac_coaches
-	) then raise exception 'available ac coaches cannot be more than total ac coaches';
-	end if;
-	if (
-	    new.available_sl_coaches > new.total_non_sl_coaches
-	) then raise exception 'available sl coaches cannot be more than total sl coaches';
-	end if;
-	return new;
-END; 
-
-$$ language plpgsql;
-
-CREATE TRIGGER CHECK_TRAIN BEFORE INSERT OR UPDATE 
-ON "TRAIN" FOR EACH ROW EXECUTE PROCEDURE CHECK_TRAIN
-() ; -- PROCEDURE TO UPDATE AVAILABLE COACHES LANGUAGE POSTGRESQL 
-CREATE OR REPLACE FUNCTION UPDATE_COACHES(TRAINNAME 
-VARCHAR(10)) RETURNS VOID AS 
-	$$ begin
-	update Train
-	set
-		available_ac_coaches = available_ac_coaches - ac_coaches,
-		available_sl_coaches = available_sl_coaches - sl_coaches
-	where
-		train_id = trainId
-		and date_of_journey = dateofjourney;
-END; 
-
-$$ language plpgsql;
-
 -- create table seperately for each coach type
 
-CREATE OR REPLACE FUNCTION add_train(train_name  VARCHAR(10), AC INT, SL INT) 
+
+CREATE OR REPLACE FUNCTION add_train(train_name  VARCHAR, ac_coaches INT, seats_ac_coach INT, sl_coaches INT, seats_sl_coach INT) 
 RETURNS VOID AS $$
 DECLARE
-	traniname_ac = train_name || 'AC'
-	traniname_sl = train_name || 'SL'
-
+	traniname_ac VARCHAR := train_name || '_AC';
+	traniname_sl VARCHAR := train_name || '_SL';
+	total_ac_seats INTEGER := ac_coaches * seats_ac_coach;
+	total_sl_seats INTEGER := sl_coaches * seats_sl_coach;
 BEGIN 
 
 	execute 'CREATE TABLE '|| traniname_ac ||'(
-		coach_number INT NOT NULL,
-		seat_number INT NOT NULL,
-		available INT NOT NULL,
+		coach_number INT,
+		seat_number INT,
+		available INT,
+		PRIMARY KEY(coach_number, seat_number)
 	)' ;
 
 	execute 'CREATE TABLE '|| traniname_sl ||'(
-		coach_number INT NOT NULL,
-		seat_number INT NOT NULL,
-		available INT NOT NULL,
+		coach_number INT,
+		seat_number INT,
+		available INT,
+		PRIMARY KEY(coach_number, seat_number)
 	)' ;
 
+	FOR seat in 0..(total_ac_seats-1) LOOP
+		execute 'INSERT INTO '|| traniname_ac ||' VALUES('|| seat/seats_ac_coach +1 ||','|| mod(seat,seats_ac_coach)+1 ||',1)';
+	END LOOP;
 
+	FOR seat in 0..(total_sl_seats-1) LOOP
+		execute 'INSERT INTO '|| traniname_sl ||' VALUES('|| seat/seats_sl_coach +1 ||','|| mod(seat,seats_sl_coach)+1 ||',1)';
+	END LOOP;
 END; 
 $$ language plpgsql;
-
