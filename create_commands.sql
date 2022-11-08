@@ -6,19 +6,20 @@ CREATE TABLE passenger (
     -- passenger_age INT NOT NULL,
     -- passenger_gender CHAR NOT NULL,
     PNR INT NOT NULL,
-    seat_no INT NOT NULL,
+    coach_number INT NOT NULL,
+    seat_number INT NOT NULL,
     FOREIGN KEY (PNR) references Ticket(PNR),
-    Foreign Key (seat_no) REFERENCES Coach_Details(Berth_Number),
+    Foreign Key (seat_number) REFERENCES Coach_Details(Berth_Number),
     PRIMARY KEY (passenger_id)
 );
 
 --Ticket
 
 CREATE TABLE Ticket (
-    PNR SERIAL ,
+    PNR INT NOT NULL ,
     train_id INT NOT NULL,
     date_of_journey DATE NOT NULL,
     number_passenger INT NOT NULL,
-    coach_type INT NOT NULL,
+    coach_type CHAR(2) NOT NULL,
     PRIMARY KEY (PNR),
 );  
