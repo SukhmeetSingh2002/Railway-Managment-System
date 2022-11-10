@@ -1,6 +1,7 @@
 -- create table seperately for each coach type
 -- train tabele contains seat_no,birth_no,available,coach_type
 
+---Function to release trains
 
 CREATE OR REPLACE FUNCTION add_train(train_name  VARCHAR, ac_coaches INT, seats_ac_coach INT, sl_coaches INT, seats_sl_coach INT) 
 RETURNS VOID AS $$
@@ -35,8 +36,6 @@ BEGIN
 END; 
 $$ language plpgsql;
 
-
-
 -- check if train exists using information_schema 
 create or replace function check_train_exists(trainName VARCHAR(10)) returns boolean as $$
 begin
@@ -44,73 +43,91 @@ begin
 end;
 $$ language plpgsql;
 
-
--- booking seats
-create or replace function book_seats(train_name VARCHAR, number_of_passengers INT) returns boolean as $$
--- declare a cursor to store rows from train table
-
-declare
-    c1 CURSOR for select * from train_name
-    LIMIT (
-        CASE
-            WHEN (select Count(*) from (select * from train_name for key share skip locked limit number_of_passengers) as t) >= number_of_passengers THEN number_of_passengers
-            else 0
-            end
-        ) for update;
--- declare a variable to store the number of rows updated
-last_coach int;
-last_seat int;
-concatenated_string varchar;
-    
+-- generate unique PNR for each ticket randomly 
+create or replace function generate_pnr() returns int as $$
 begin
-    if (select count(*) from c1) > 0 then
-        for row in c1 loop
-            update train_name set available = 0 where seat_number = row.seat_number;
-            last_coach = row.coach_number;
-            last_seat = row.seat_number;
-        end loop;
-        concatenated_string =  last_coach ||' '||  last_seat;
-        return concatenated_string;
-    end if;
-return '0';
+    return random() * 1000000000;
 end;
 $$ language plpgsql;
+
+-- booking seats
+create or replace function book_seats(train_name VARCHAR, number_of_passengers INT) 
+returns integer as $$
+-- declare a cursor to store rows from train table
+declare
+    c1 refcursor;
+-- declare a variable to store the number of rows updated
+    last_coach int;
+    last_seat int;
+    concatenated_string varchar;
+    available int;
+    return_value int;
+begin
+    open c1  for execute format(
+        'select * from %I where available = 1 LIMIT (
+        CASE
+            WHEN (select Count(*) from (select * from %I where available = 1 for key share skip locked limit $1 ) as t) >= $1 THEN $1 
+            ELSE 0
+            END
+        )  for update',train_name,train_name)
+        USING number_of_passengers;
+----------------------NEED to add available =1--------------------------
+    if (c1 is not NULL) then
+        loop
+            fetch c1 into last_coach,last_seat,available;
+            exit when not found;
+            return_value = last_coach*100 + last_seat;
+            -- raise notice 'last_coach: %, last_seat: %', last_coach, last_seat;
+            execute  format('update %I set available = 0 where coach_number = $1 and  seat_number = $2',train_name)
+            USING last_coach,last_seat;
+        end loop;
+        -- raise notice 'return value: %', return_value;
+        close c1;
+        return return_value;
+    end if;
+    close c1;
+return -1;
+end;
+$$ language plpgsql;
+
 
 -- book ticket if train exists and available seats are more than number of passengers using for update
 create or replace procedure book_ticket(trainName VARCHAR, number_passenger INT, passenger_names varchar,seats_ac_coach INT,seats_sl_coach INT)   
 as $$
 declare 
-    seats_available boolean;
+    seats_available boolean := false;
     passenger_name varchar;
     train_details varchar[] :=string_to_array(trainName,'_');
     pnr_number int:=random() * 1000000000;
     coach_number int:=0;
     seat_number int:=0;
-    seat_info varchar;
+    seat_info integer;
+    temp_seat_info varchar[];
+    passenger_name_array varchar[] :=string_to_array(passenger_names,',');
 begin
     if (check_train_exists(trainName)) then
         for i in 1..3 loop
-            seat_info = book_seats(trainName, number_passenger);
-            if (seat_info<>'0') then
-                commit;
+            seat_info := book_seats(trainName, number_passenger);
+            -- raise notice 'Your seat: %  where i is : %',seat_info,i;
+            if (seat_info <>-1) then
                 seats_available := true;
                 exit;
             end if;
         end loop;
-        
-        coach_number := string_to_array(seat_info,' ')[0]::int;
-        seat_number := string_to_array(seat_info,' ')[1]::int;
 
         if (seats_available) then
-            insert into ticket  values (pnr_number,train_details[0] ::DECIMAL, to_date(train_details[1],'YYYYMMDD'), number_passenger, train_details[2]);
-            for passenger_name in array select * from string_to_array(passenger_names, ' ') loop
+            coach_number := seat_info/100;
+            seat_number := seat_info%100;
+            raise notice 'train details: %, ',train_details;
+            insert into ticket  values (pnr_number,train_details[2] ::DECIMAL, to_date(train_details[3],'YYYYMMDD'), number_passenger, train_details[4]);
+            foreach passenger_name in array passenger_name_array loop
                 -- insert into ticket table 
-                insert into passenger values (passenger_name, pnr_number, coach_number, seat_number);
+                insert into passenger(passenger_name,PNR,coach_number,seat_number) values (passenger_name, pnr_number, coach_number, seat_number);
                 seat_number := seat_number - 1;
                 if (seat_number = 0) then
                     coach_number := coach_number - 1;
                     seat_number := seats_ac_coach;
-                    if(train_details[2] = 'SL') then
+                    if(train_details[2] = 'sl') then
                         seat_number := seats_sl_coach;
                     end if;
                 end if;
@@ -122,9 +139,4 @@ begin
 end;
 $$ language plpgsql;
 
--- generate unique PNR for each ticket randomly 
-create or replace function generate_pnr() returns int as $$
-begin
-    return random() * 1000000000;
-end;
-$$ language plpgsql;
+
