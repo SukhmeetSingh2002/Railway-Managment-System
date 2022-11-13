@@ -11,7 +11,6 @@ import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-// import java.sql.*;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -102,8 +101,7 @@ class QueryRunner implements Runnable
                     passenger_name+=InpArr[i];
                 }
                 
-                System.out.println("passenger_name: " + passenger_name);
-                String query_book_ticket=String.format("call book_ticket(%s, %d, %s,18,24,10)", train_name, number_passengers, passenger_name);
+                String query_book_ticket=String.format("call book_ticket(\'%s\', %d, \'%s\',18,24,10)", train_name, number_passengers, passenger_name);
                 
                 
                 // printing the query
