@@ -63,20 +63,21 @@ declare
     available int;
     return_value int;
 begin
+    return_value := -1;
     open c1  for execute format(
         'select * from %I where available = 1 LIMIT (
         CASE
             WHEN (select Count(*) from (select * from %I where available = 1 for key share skip locked limit $1 ) as t) >= $1 THEN $1 
             ELSE 0
             END
-        )  for update',train_name,train_name)
+        )  for update skip locked',train_name,train_name)
         USING number_of_passengers;
 ----------------------NEED to add available =1--------------------------
     if (c1 is not NULL) then
         loop
             fetch c1 into last_coach,last_seat,available;
             exit when not found;
-            return_value = last_coach*100 + last_seat;
+            return_value := last_coach*100 + last_seat;
             -- raise notice 'last_coach: %, last_seat: %', last_coach, last_seat;
             execute  format('update %I set available = 0 where coach_number = $1 and  seat_number = $2',train_name)
             USING last_coach,last_seat;
@@ -86,7 +87,7 @@ begin
         return return_value;
     end if;
     close c1;
-return -1;
+    return -1;
 end;
 $$ language plpgsql;
 
@@ -112,6 +113,7 @@ begin
             -- raise notice 'Your seat: %  where i is : %',seat_info,i;
             if (seat_info <>-1) then
                 seats_available := true;
+                COMMIT;
                 exit;
             end if;
         end loop;
@@ -133,6 +135,9 @@ begin
                     end if;
                 end if;
             end loop;
+        else
+            raise exception 'No seats available';
+            return_variable := 0;
         end if;
     else
         -- ? To check this
