@@ -92,7 +92,7 @@ $$ language plpgsql;
 
 
 -- book ticket if train exists and available seats are more than number of passengers using for update
-create or replace procedure book_ticket(trainName VARCHAR, number_passenger INT, passenger_names varchar,seats_ac_coach INT,seats_sl_coach INT)   
+create or replace procedure book_ticket(trainName VARCHAR, number_passenger INT, passenger_names varchar,seats_ac_coach INT,seats_sl_coach INT,INOUT return_variable INT)   
 as $$
 declare 
     seats_available boolean := false;
@@ -105,6 +105,7 @@ declare
     temp_seat_info varchar[];
     passenger_name_array varchar[] :=string_to_array(passenger_names,',');
 begin
+    return_variable :=1;
     if (check_train_exists(trainName)) then
         for i in 1..3 loop
             seat_info := book_seats(trainName, number_passenger);
@@ -134,7 +135,9 @@ begin
             end loop;
         end if;
     else
+        -- ? To check this
         raise exception 'train does not exist';
+        return_variable := 0;
     end if;
 end;
 $$ language plpgsql;

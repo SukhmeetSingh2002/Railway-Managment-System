@@ -1,0 +1,8 @@
+*.pdf
+META-INF/
+*.properties
+*.class
+testing.py
+Java/README
+Java/Input/
+Java/Output/
