@@ -1,3 +1,6 @@
+-- Active: 1667913408493@@127.0.0.1@5432@project
+-- SQLBook: Code
+
 -- create table seperately for each coach type
 -- train tabele contains seat_no,birth_no,available,coach_type
 
@@ -99,14 +102,13 @@ declare
     seats_available boolean := false;
     passenger_name varchar;
     train_details varchar[] :=string_to_array(trainName,'_');
-    pnr_number int:=random() * 1000000000;
+    pnr_number varchar;
     coach_number int:=0;
     seat_number int:=0;
     seat_info integer;
     temp_seat_info varchar[];
     passenger_name_array varchar[] :=string_to_array(passenger_names,',');
 begin
-    return_variable :=1;
     if (check_train_exists(trainName)) then
         for i in 1..3 loop
             seat_info := book_seats(trainName, number_passenger);
@@ -119,6 +121,8 @@ begin
         end loop;
 
         if (seats_available) then
+            pnr_number :=train_details[2] || train_details[3] || seat_info ||train_details[4];
+            return_variable:=seat_info;
             coach_number := seat_info/100;
             seat_number := seat_info%100;
             raise notice 'train details: %, ',train_details;
@@ -136,13 +140,13 @@ begin
                 end if;
             end loop;
         else
-            raise exception 'No seats available';
-            return_variable := 0;
+            -- raise exception 'No seats available';
+            return_variable := -1;
         end if;
     else
         -- ? To check this
-        raise exception 'train does not exist';
-        return_variable := 0;
+        -- raise exception 'train does not exist';
+        return_variable := -2;
     end if;
 end;
 $$ language plpgsql;

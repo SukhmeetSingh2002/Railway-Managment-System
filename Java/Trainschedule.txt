@@ -16,3 +16,6 @@
 Train Schedule file-format
 <Train-No> <date of journey> <no:of Ac-coaches> <no:of sleeper-coaches>
 # -> end of inputs
+
+
+Trainschedule.txt

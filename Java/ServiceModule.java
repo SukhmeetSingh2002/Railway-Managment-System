@@ -73,6 +73,7 @@ class QueryRunner implements Runnable
             PrintWriter printWriter = new PrintWriter(bufferedOutput, true) ;
             String clientCommand = "" ;
             String responseQuery = "" ;
+            Integer response =0;
             // Read client query from the socket endpoint
             clientCommand = bufferedInput.readLine(); 
             
@@ -109,22 +110,40 @@ class QueryRunner implements Runnable
                 try {
                     ResultSet rs = c.createStatement().executeQuery(query_book_ticket);
                     // get the response from the database
+                    // ResultSetMetaData rsmd = rs.getMetaData();
+                    // System.out.println("values of result set is: "+ rs.getInt("return_variable"));
+
                     while (rs.next()) {
-                        responseQuery += rs.getRow() + " ";
+                        response = rs.getInt("return_variable");
                     }
                     rs.close();
-                    // c.close();
-                    
-                    // responseQuery = "Ticket booked successfully";
-                    // System.out.println("Ticket booked successfully: " + responseQuery);
+                    if(response==-2){
+                        responseQuery = "Train with id: "+InpArr[number_passengers+1]+" is not released on date: "+InpArr[number_passengers+2]+".\n";
+                    }
+                    else if (response == -1){
+                        responseQuery = "Train with id: "+InpArr[number_passengers+1]+" is full on date: "+InpArr[number_passengers+2]+".\n";
+                    }
+                    else{
+                        responseQuery="Ticket booked successfully for train id: "+InpArr[number_passengers+1]+", on date: "+InpArr[number_passengers+2]+ "with PNR: "+InpArr[number_passengers+1]+train_date+response+coach_type+"\n";
+                        Integer coach = response/100;
+                        Integer seat = response%100;
+                        for (int i = 1; i <= number_passengers; i++) {
+                            responseQuery+=InpArr[i]+" is in coach: "+coach+" seat: "+seat+".\n";
+                            seat--;
+                            if(seat==0){
+                                seat=24;
+                                if(coach_type.equals("ac")){
+                                    seat=18;
+                                }
+                                coach--;
+                            }
+                        }
+                    }
+                    // System.out.println("response: " + response);
                 } catch (Exception e) {
                     // System.err.println("ERROR:"+e.getClass().getName() + ": " + e.getMessage());
                 }
-                // close the connection
                 
-                // ! Dummy response send to client
-                responseQuery = "******* Dummy result ******";      
-                //  Sending data back to the client
                 printWriter.println(responseQuery);
                 // Read next client query
                 clientCommand = bufferedInput.readLine(); 
@@ -171,12 +190,12 @@ public class ServiceModule
             // Always-ON server
             while(true)
             {
-                // System.out.println("Listening port : " + serverPort 
-                //                     + "\nWaiting for clients...");
+                System.out.println("Listening port : " + serverPort 
+                                    + "\nWaiting for clients...");
                 socketConnection = serverSocket.accept();   // Accept a connection from a client
-                // System.out.println("Accepted client :" 
-                //                     + socketConnection.getRemoteSocketAddress().toString() 
-                //                     + "\n");
+                System.out.println("Accepted client :" 
+                                    + socketConnection.getRemoteSocketAddress().toString() 
+                                    + "\n");
                 //  Create a runnable task
                 Runnable runnableTask = new QueryRunner(socketConnection);
                 //  Submit task for execution   

@@ -60,7 +60,7 @@ public class ReleaseTrain {
         //   System.out.println("i: "+i+" = "+values[i]);
         // }
         String train_name = "t_" + values[0] + "_" + values[1].replace("-", "");
-        String query_release_train=String.format("select release_train(\'%s\', %d, 18,\'%d\',24)", train_name, Integer.parseInt(values[2]), Integer.parseInt(values[4]));
+        String query_release_train=String.format("select release_train(\'%s\', %d, 18,%d,24)", train_name, Integer.parseInt(values[2]), Integer.parseInt(values[4]));
         //print query_relase_train
         System.out.println(query_release_train);
         c.createStatement().execute(query_release_train);
@@ -73,7 +73,11 @@ public class ReleaseTrain {
   public static void main(String[] args) throws IOException{
     Scanner input = new Scanner(System.in);
     System.out.print("Enter name of the file for releasing trains: ");
-    String file = input.nextLine();
+    String file = "Trainschedule.txt";
+    String tmp = input.nextLine();
+    if(!tmp.equals("")){
+      file = tmp;
+    }
     release_trains(file);
     input.close();
   }

@@ -4,7 +4,7 @@ META-INF/
 *.class
 testing.py
 Java/README
-Java/Input/
+Java/Input*/
 Java/Output/
 *.class
 *.zip
