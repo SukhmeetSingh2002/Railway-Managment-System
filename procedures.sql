@@ -3,7 +3,7 @@
 
 ---Function to release trains
 
-CREATE OR REPLACE FUNCTION add_train(train_name  VARCHAR, ac_coaches INT, seats_ac_coach INT, sl_coaches INT, seats_sl_coach INT) 
+CREATE OR REPLACE FUNCTION release_train(train_name  VARCHAR, ac_coaches INT, seats_ac_coach INT, sl_coaches INT, seats_sl_coach INT) 
 RETURNS VOID AS $$
 DECLARE
 	traniname_ac VARCHAR := train_name || '_AC';
