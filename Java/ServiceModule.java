@@ -44,9 +44,9 @@ class QueryRunner implements Runnable
         Connection c = null;
         try {
             c = DriverManager.getConnection(url, user, password);
-            System.out.println("Opened database successfully");
+            // System.out.println("Opened database successfully");
         } catch (Exception e) {
-            System.err.println("ERROR:"+e.getClass().getName() + ": " + e.getMessage());
+            // System.err.println("ERROR:"+e.getClass().getName() + ": " + e.getMessage());
         }
         return c;
     }
@@ -82,8 +82,8 @@ class QueryRunner implements Runnable
             while( ! clientCommand.equals("#"))
             {
                 
-                System.out.println("Recieved data <" + clientCommand + "> from client : " 
-                + socketConnection.getRemoteSocketAddress().toString());
+                // System.out.println("Recieved data <" + clientCommand + "> from client : " 
+                // + socketConnection.getRemoteSocketAddress().toString());
                 /*******************************************
                  Your DB code goes here
                  ********************************************/
@@ -105,7 +105,7 @@ class QueryRunner implements Runnable
                 
                 
                 // printing the query
-                System.out.println("query_book_ticket: " + query_book_ticket);
+                // System.out.println("query_book_ticket: " + query_book_ticket);
                 try {
                     ResultSet rs = c.createStatement().executeQuery(query_book_ticket);
                     // get the response from the database
@@ -116,9 +116,9 @@ class QueryRunner implements Runnable
                     // c.close();
                     
                     // responseQuery = "Ticket booked successfully";
-                    System.out.println("Ticket booked successfully: " + responseQuery);
+                    // System.out.println("Ticket booked successfully: " + responseQuery);
                 } catch (Exception e) {
-                    System.err.println("ERROR:"+e.getClass().getName() + ": " + e.getMessage());
+                    // System.err.println("ERROR:"+e.getClass().getName() + ": " + e.getMessage());
                 }
                 // close the connection
                 
@@ -133,7 +133,7 @@ class QueryRunner implements Runnable
             try {
                 c.close();
             } catch (Exception e) {
-                System.err.println("ERROR:"+e.getClass().getName() + ": " + e.getMessage());
+                // System.err.println("ERROR:"+e.getClass().getName() + ": " + e.getMessage());
             }
             inputStream.close();
             bufferedInput.close();
@@ -171,12 +171,12 @@ public class ServiceModule
             // Always-ON server
             while(true)
             {
-                System.out.println("Listening port : " + serverPort 
-                                    + "\nWaiting for clients...");
+                // System.out.println("Listening port : " + serverPort 
+                //                     + "\nWaiting for clients...");
                 socketConnection = serverSocket.accept();   // Accept a connection from a client
-                System.out.println("Accepted client :" 
-                                    + socketConnection.getRemoteSocketAddress().toString() 
-                                    + "\n");
+                // System.out.println("Accepted client :" 
+                //                     + socketConnection.getRemoteSocketAddress().toString() 
+                //                     + "\n");
                 //  Create a runnable task
                 Runnable runnableTask = new QueryRunner(socketConnection);
                 //  Submit task for execution   

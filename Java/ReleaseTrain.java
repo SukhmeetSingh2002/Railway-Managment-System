@@ -56,10 +56,11 @@ public class ReleaseTrain {
         }
         String[] values = line.split(" ");
         // print the values array
-        for (int i = 0; i < values.length; i++) {
-        }
+        // for (int i = 0; i < values.length; i++) {
+        //   System.out.println("i: "+i+" = "+values[i]);
+        // }
         String train_name = "t_" + values[0] + "_" + values[1].replace("-", "");
-        String query_release_train=String.format("select release_train(\'%s\', %d, \'%d\')", train_name, Integer.parseInt(values[2]), Integer.parseInt(values[4]));
+        String query_release_train=String.format("select release_train(\'%s\', %d, 18,\'%d\',24)", train_name, Integer.parseInt(values[2]), Integer.parseInt(values[4]));
         //print query_relase_train
         System.out.println(query_release_train);
         c.createStatement().execute(query_release_train);
