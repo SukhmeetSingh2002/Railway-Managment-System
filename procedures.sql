@@ -47,11 +47,11 @@ end;
 $$ language plpgsql;
 
 -- generate unique PNR for each ticket randomly 
-create or replace function generate_pnr() returns int as $$
-begin
-    return random() * 1000000000;
-end;
-$$ language plpgsql;
+-- create or replace function generate_pnr() returns int as $$
+-- begin
+--     return random() * 1000000000;
+-- end;
+-- $$ language plpgsql;
 
 -- booking seats
 create or replace function book_seats(train_name VARCHAR, number_of_passengers INT) 
@@ -59,27 +59,26 @@ returns integer as $$
 -- declare a cursor to store rows from train table
 declare
     c1 refcursor;
+    -- c2 refcursor;
 -- declare a variable to store the number of rows updated
     last_coach int;
     last_seat int;
     concatenated_string varchar;
     available int;
     return_value int;
+    number_of_rows int;
 begin
+    number_of_rows := 0;
     return_value := -1;
     open c1  for execute format(
-        'select * from %I where available = 1 LIMIT (
-        CASE
-            WHEN (select Count(*) from (select * from %I where available = 1 for key share skip locked limit $1 ) as t) >= $1 THEN $1 
-            ELSE 0
-            END
-        )  for update skip locked',train_name,train_name)
+        'select * from %I where available = 1 LIMIT ($1)  for update ',train_name)
         USING number_of_passengers;
 ----------------------NEED to add available =1--------------------------
     if (c1 is not NULL) then
         loop
             fetch c1 into last_coach,last_seat,available;
             exit when not found;
+            number_of_rows := number_of_rows + 1;
             return_value := last_coach*100 + last_seat;
             -- raise notice 'last_coach: %, last_seat: %', last_coach, last_seat;
             execute  format('update %I set available = 0 where coach_number = $1 and  seat_number = $2',train_name)
@@ -87,6 +86,11 @@ begin
         end loop;
         -- raise notice 'return value: %', return_value;
         close c1;
+        if (number_of_rows = number_of_passengers) then
+            return return_value;
+        else
+            return -1;
+        end if;
         return return_value;
     end if;
     close c1;
@@ -109,6 +113,7 @@ declare
     temp_seat_info varchar[];
     passenger_name_array varchar[] :=string_to_array(passenger_names,',');
 begin
+            -- SET Transaction Isolation Level SERIALIZABLE;
     if (check_train_exists(trainName)) then
         for i in 1..3 loop
             seat_info := book_seats(trainName, number_passenger);
@@ -117,6 +122,8 @@ begin
                 seats_available := true;
                 COMMIT;
                 exit;
+            ELSE
+                ROLLBACK;
             end if;
         end loop;
 
@@ -125,7 +132,7 @@ begin
             return_variable:=seat_info;
             coach_number := seat_info/100;
             seat_number := seat_info%100;
-            raise notice 'train details: %, ',train_details;
+            -- raise notice 'train details: %, ',train_details;
             insert into ticket  values (pnr_number,train_details[2] ::DECIMAL, to_date(train_details[3],'YYYYMMDD'), number_passenger, train_details[4]);
             foreach passenger_name in array passenger_name_array loop
                 -- insert into ticket table 
@@ -134,13 +141,15 @@ begin
                 if (seat_number = 0) then
                     coach_number := coach_number - 1;
                     seat_number := seats_ac_coach;
-                    if(train_details[2] = 'sl') then
+                    if(train_details[4] = 'sl') then
                         seat_number := seats_sl_coach;
                     end if;
                 end if;
             end loop;
+            COMMIT;
         else
             -- raise exception 'No seats available';
+            ROLLBACK;
             return_variable := -1;
         end if;
     else

@@ -1,4 +1,13 @@
 -- SQLBook: Code
+CREATE TABLE Ticket (
+    PNR varchar ,
+    train_id INT NOT NULL,
+    date_of_journey DATE NOT NULL,
+    number_passenger INT NOT NULL,
+    coach_type CHAR(2) NOT NULL,
+    PRIMARY KEY (PNR)
+);  
+
 
 -- table for passengers
 
@@ -15,13 +24,4 @@ CREATE TABLE passenger (
 );
 
 --Ticket
-
-CREATE TABLE Ticket (
-    PNR varchar ,
-    train_id INT NOT NULL,
-    date_of_journey DATE NOT NULL,
-    number_passenger INT NOT NULL,
-    coach_type CHAR(2) NOT NULL,
-    PRIMARY KEY (PNR)
-);  
 

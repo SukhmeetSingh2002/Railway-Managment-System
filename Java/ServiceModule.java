@@ -17,6 +17,9 @@ import java.util.concurrent.Executors;
 
 class QueryRunner implements Runnable
 {
+    String[] berth_type_ac = {"LB","LB","UB","UB","SL","SU"};
+    String[] berth_type_sl = {"LB","MB","UB","LB","MB","UB","SL","SU"};
+
     public static Properties readPropertiesFile(String fileName) throws IOException {
         FileInputStream fis = null;
         Properties prop = null;
@@ -46,7 +49,7 @@ class QueryRunner implements Runnable
             c = DriverManager.getConnection(url, user, password);
             // System.out.println("Opened database successfully");
         } catch (Exception e) {
-            // System.err.println("ERROR:"+e.getClass().getName() + ": " + e.getMessage());
+            System.err.println("ERROR:"+e.getClass().getName() + ": " + e.getMessage());
         }
         return c;
     }
@@ -118,17 +121,22 @@ class QueryRunner implements Runnable
                     }
                     rs.close();
                     if(response==-2){
-                        responseQuery = "Train with id: "+InpArr[number_passengers+1]+" is not released on date: "+InpArr[number_passengers+2]+".\n";
+                        responseQuery = "Train with id: "+train_id+" is not released on date: "+InpArr[number_passengers+2]+".\n";
                     }
                     else if (response == -1){
-                        responseQuery = "Train with id: "+InpArr[number_passengers+1]+" is full on date: "+InpArr[number_passengers+2]+".\n";
+                        responseQuery = "Train with id: "+train_id+" is full on date: "+InpArr[number_passengers+2]+ "for "+ coach_type+ " coach.\n";
                     }
                     else{
-                        responseQuery="Ticket booked successfully for train id: "+InpArr[number_passengers+1]+", on date: "+InpArr[number_passengers+2]+ "with PNR: "+InpArr[number_passengers+1]+train_date+response+coach_type+"\n";
+                        responseQuery="Ticket booked successfully for train id: "+train_id+", on date: "+InpArr[number_passengers+2]+ " for "+coach_type+ " with PNR: "+train_id+train_date+response+coach_type+"\n";
                         Integer coach = response/100;
                         Integer seat = response%100;
                         for (int i = 1; i <= number_passengers; i++) {
-                            responseQuery+=InpArr[i]+" is in coach: "+coach+" seat: "+seat+".\n";
+                            if(coach_type.equals("ac")){
+                            responseQuery+=InpArr[i]+" is in coach: "+coach+" seat: "+seat+" with berth type: "+berth_type_ac[(seat-1)%6]+".\n";
+                            }
+                            else{
+                            responseQuery+=InpArr[i]+" is in coach: "+coach+" seat: "+seat+" with berth type: "+berth_type_sl[(seat-1)%8]+".\n";
+                            }
                             seat--;
                             if(seat==0){
                                 seat=24;
@@ -141,7 +149,7 @@ class QueryRunner implements Runnable
                     }
                     // System.out.println("response: " + response);
                 } catch (Exception e) {
-                    // System.err.println("ERROR:"+e.getClass().getName() + ": " + e.getMessage());
+                    System.err.println("ERROR:"+e.getClass().getName() + ": " + e.getMessage());
                 }
                 
                 printWriter.println(responseQuery);
@@ -152,7 +160,7 @@ class QueryRunner implements Runnable
             try {
                 c.close();
             } catch (Exception e) {
-                // System.err.println("ERROR:"+e.getClass().getName() + ": " + e.getMessage());
+                System.err.println("ERROR:"+e.getClass().getName() + ": " + e.getMessage());
             }
             inputStream.close();
             bufferedInput.close();
