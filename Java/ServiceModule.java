@@ -76,7 +76,8 @@ class QueryRunner implements Runnable
             PrintWriter printWriter = new PrintWriter(bufferedOutput, true) ;
             String clientCommand = "" ;
             String responseQuery = "" ;
-            Integer response =0;
+            // String responseQuery = "" ;
+
             // Read client query from the socket endpoint
             clientCommand = bufferedInput.readLine(); 
             
@@ -85,9 +86,8 @@ class QueryRunner implements Runnable
             String[] InpArr = null;
             while( ! clientCommand.equals("#"))
             {
-                
-                // System.out.println("Recieved data <" + clientCommand + "> from client : " 
-                // + socketConnection.getRemoteSocketAddress().toString());
+                // System.out.println(clientCommand);
+                //print clientCommand
                 /*******************************************
                  Your DB code goes here
                  ********************************************/
@@ -98,15 +98,15 @@ class QueryRunner implements Runnable
                 Integer train_id = Integer.parseInt(InpArr[number_passengers+1]);
                 String train_date = InpArr[number_passengers+2].replace("-", "");
                 String coach_type = InpArr[number_passengers+3].toLowerCase();
-                String train_name = "t_" + train_id.toString() + "_" + train_date+ "_" + coach_type;
+                String train_name = coach_type + "_" + train_id.toString() + "_" + train_date;
 
                 String passenger_name="";
                 for (int i = 1; i <= number_passengers; i++) {
                     passenger_name+=InpArr[i];
                 }
                 
-                String query_book_ticket=String.format("call book_ticket(\'%s\', %d, \'%s\',18,24,10)", train_name, number_passengers, passenger_name);
-                
+                String query_book_ticket=String.format("call book_ticket(\'%s\', %d, \'%s\',18,24,\'1\')", train_name, number_passengers, passenger_name);
+                // System.out.println(query_book_ticket);
                 
                 // printing the query
                 // System.out.println("query_book_ticket: " + query_book_ticket);
@@ -115,46 +115,60 @@ class QueryRunner implements Runnable
                     // get the response from the database
                     // ResultSetMetaData rsmd = rs.getMetaData();
                     // System.out.println("values of result set is: "+ rs.getInt("return_variable"));
-
+                    
                     while (rs.next()) {
-                        response = rs.getInt("return_variable");
+                        responseQuery = rs.getString("return_variable");
+                        // System.out.println(responseQuery);
                     }
                     rs.close();
-                    if(response==-2){
-                        responseQuery = "Train with id: "+train_id+" is not released on date: "+InpArr[number_passengers+2]+".\n";
+                    // System.out.println("response: " + response);
+                    
+                    
+                    if( responseQuery.equals("-1")){
+                        responseQuery = "Sorry,Train with id: " + train_id.toString() + " is full on date: " + InpArr[number_passengers+2] + " for " + coach_type + " coach type.\n";
+                        // System.out.println("exiting -1");
                     }
-                    else if (response == -1){
-                        responseQuery = "Train with id: "+train_id+" is full on date: "+InpArr[number_passengers+2]+ "for "+ coach_type+ " coach.\n";
+                    else if(responseQuery.equals("-2")){
+                        responseQuery = "Sorry,Train with id: " + train_id.toString() + " is not released on date: " + InpArr[number_passengers+2] + ".\n";
+                        // System.out.println("exiting -2");
                     }
                     else{
-                        responseQuery="Ticket booked successfully for train id: "+train_id+", on date: "+InpArr[number_passengers+2]+ " for "+coach_type+ " with PNR: "+train_id+train_date+response+coach_type+"\n";
-                        Integer coach = response/100;
-                        Integer seat = response%100;
+                        String[] seat_info = responseQuery.split(" ");
+                        // print seat_info array 
+                        // assert seat_info.length == number_passengers+1;
+
+                        // System.out.println("length seat info: " +seat_info.length);
+                        // for (int i = 0; i < seat_info.length; i++) {
+                        //     System.out.println("AT index: "+ i + " "+seat_info[i]);
+                        // }
+
+                        responseQuery = "Your ticket has been booked for train with id: " + train_id.toString() + " on date: " + InpArr[number_passengers+2] + " for " + coach_type + " coach type with PNR: " +train_id+train_date+seat_info[1]+coach_type + "\n";
+                        // System.out.println("enter else");
                         for (int i = 1; i <= number_passengers; i++) {
+                            // System.out.println("debug "+ number_passengers + " and i: " +i);
+                            Integer seat = Integer.parseInt(seat_info[i]);
                             if(coach_type.equals("ac")){
-                            responseQuery+=InpArr[i]+" is in coach: "+coach+" seat: "+seat+" with berth type: "+berth_type_ac[(seat-1)%6]+".\n";
+                                responseQuery += "Passenger :" + InpArr[i]  + " has been allotted coach number: " + seat/100 +" with seat number: "+ seat%100 + " with berth type: "+berth_type_ac[(seat%100-1)%6] +".\n";
                             }
                             else{
-                            responseQuery+=InpArr[i]+" is in coach: "+coach+" seat: "+seat+" with berth type: "+berth_type_sl[(seat-1)%8]+".\n";
+                                responseQuery += "Passenger :" + InpArr[i]  + " has been allotted coach number: " + seat/100 +" with seat number: "+ seat%100 + " with berth type: "+berth_type_sl[(seat%100-1)%8] +".\n";
                             }
-                            seat--;
-                            if(seat==0){
-                                seat=24;
-                                if(coach_type.equals("ac")){
-                                    seat=18;
-                                }
-                                coach--;
-                            }
+
                         }
+                        // System.out.println("exit else");
+
                     }
-                    // System.out.println("response: " + response);
                 } catch (Exception e) {
                     System.err.println("ERROR:"+e.getClass().getName() + ": " + e.getMessage());
+                    System.err.println("CLIENT COMMAND: " + clientCommand);
+                    System.err.println("reponse: " + responseQuery);
+                    e.printStackTrace();
                 }
-                
                 printWriter.println(responseQuery);
+
                 // Read next client query
                 clientCommand = bufferedInput.readLine(); 
+                // System.out.println(clientCommand.charAt(0));
             }
             // close the connection
             try {
@@ -184,7 +198,7 @@ public class ServiceModule
     // Server listens to port
     static int serverPort = 7008;
     // Max no of parallel requests the server can process
-    static int numServerCores = 5 ;         
+    static int numServerCores = 50 ;         
     //------------ Main----------------------
     public static void main(String[] args) throws IOException 
     {    
@@ -198,12 +212,12 @@ public class ServiceModule
             // Always-ON server
             while(true)
             {
-                System.out.println("Listening port : " + serverPort 
-                                    + "\nWaiting for clients...");
+                // System.out.println("Listening port : " + serverPort 
+                //                     + "\nWaiting for clients...");
                 socketConnection = serverSocket.accept();   // Accept a connection from a client
-                System.out.println("Accepted client :" 
-                                    + socketConnection.getRemoteSocketAddress().toString() 
-                                    + "\n");
+                // System.out.println("Accepted client :" 
+                //                     + socketConnection.getRemoteSocketAddress().toString() 
+                //                     + "\n");
                 //  Create a runnable task
                 Runnable runnableTask = new QueryRunner(socketConnection);
                 //  Submit task for execution   

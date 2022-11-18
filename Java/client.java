@@ -8,7 +8,7 @@ public class client
     public static void main(String args[])throws IOException
     {
         /**************************/
-        int firstLevelThreads = 50 ;   // Indicate no of users 
+        int firstLevelThreads = 5 ;   // Indicate no of users 
         /**************************/
         // Creating a thread pool
         ExecutorService executorService = Executors.newFixedThreadPool(firstLevelThreads);
@@ -20,9 +20,10 @@ public class client
         }
 
         executorService.shutdown();
+    
         try
         {    // Wait for 8 sec and then exit the executor service
-            if (!executorService.awaitTermination(10, TimeUnit.SECONDS))
+            if (!executorService.awaitTermination(100, TimeUnit.SECONDS))
             {
                 executorService.shutdownNow();
             } 
