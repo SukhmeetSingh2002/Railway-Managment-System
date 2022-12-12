@@ -39,6 +39,7 @@ class sendQuery implements Runnable
             PrintWriter printWriter = new PrintWriter(bufferedOutput,true);
             File queries = new File(inputfile); 
             File output = new File(outputfile); 
+            output.createNewFile();
             FileWriter filewriter = new FileWriter(output);
             Scanner queryScanner = new Scanner(queries);
             String query = "";

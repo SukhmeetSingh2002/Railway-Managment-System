@@ -1,4 +1,7 @@
--- SQLBook: Code
+
+drop table if exists Ticket CASCADE;
+drop table if exists Passenger;
+
 CREATE TABLE Ticket (
     PNR varchar ,
     train_id INT NOT NULL,
@@ -23,5 +26,5 @@ CREATE TABLE passenger (
     PRIMARY KEY (passenger_id)
 );
 
---Ticket
+-- Ticket
 

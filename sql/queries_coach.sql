@@ -1,10 +1,14 @@
+drop table if exists ac_coach;
+drop table if exists sl_coach;
+
+
 CREATE TABLE ac_coach (
-  berth_number INT NOT NULL,
+  berth_number INT PRIMARY KEY,
   berth_type CHAR(2) NOT NULL
 );
 
 CREATE TABLE sl_coach (
-  berth_number INT NOT NULL,
+  berth_number INT PRIMARY KEY,
   berth_type CHAR(2) NOT NULL
 );
 
